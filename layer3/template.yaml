@@ -1,0 +1,259 @@
+# Layer 3: Policy Document Template
+# This template represents organization-specific, risk-informed governance policies
+# Policies customize Layer 1 guidance and Layer 2 controls for organizational needs
+
+metadata:
+  # Unique identifier for this policy
+  id: "policy-id"
+  # Human-readable title
+  title: "Policy Title"
+  # Objective of the policy
+  objective: "What this policy aims to achieve"
+  # Version of the policy (semantic versioning recommended)
+  version: "1.0.0"
+  # ISO 8601 datetime of last modification (optional)
+  last-modified: "2024-01-15T00:00:00Z"
+  # Organization identifier (optional)
+  organization-id: "org-12345"
+  # Author notes (optional)
+  author-notes: "Notes about the policy creation or updates"
+
+  # References to other documents (optional)
+  mapping-references:
+    - id: "REFERENCE-ID"
+      title: "Reference Document Title"
+      version: "1.0.0"
+      description: "Description of the reference"
+      url: "https://example.com/reference-document"
+
+  # Contacts using RACI model
+  contacts:
+    # Author: Creates the policy
+    author:
+      name: "Author Name"
+      primary: true  # Only one should be primary
+      affiliation: "Department or Organization"
+      email: "author@example.com"
+      social: "@author-handle"  # Optional
+
+    # Responsible: Implements technical controls
+    responsible:
+      - name: "Responsible Person 1"
+        primary: true
+        affiliation: "IT Department"
+        email: "responsible1@example.com"
+      - name: "Responsible Person 2"
+        primary: false
+        affiliation: "Security Team"
+        email: "responsible2@example.com"
+
+    # Accountable: Evaluates and enforces controls
+    accountable:
+      - name: "Accountable Person"
+        primary: true
+        affiliation: "Executive Team"
+        email: "accountable@example.com"
+
+    # Consulted: Provides input (optional)
+    consulted:
+      - name: "Consulted Person"
+        affiliation: "Legal Department"
+        email: "consulted@example.com"
+
+    # Informed: Receives updates (optional)
+    informed:
+      - name: "Informed Person"
+        affiliation: "All Employees"
+
+# Scope: What this policy applies to
+scope:
+  # Geopolitical boundaries (optional)
+  boundaries:
+    - "United States"
+    - "European Union"
+  # Technology categories (optional)
+  technologies:
+    - "Cloud Computing"
+    - "Git Repositories"
+    - "CI/CD Pipelines"
+  # Service providers (optional)
+  providers:
+    - "GitHub Enterprise"
+    - "Amazon Web Services"
+
+# Implementation plan (optional)
+implementation-plan:
+  # Process for notifying parties (optional)
+  notification-process: "Policy will be announced via company-wide security bulletin..."
+  # Parties to notify (optional)
+  notified-parties:
+    - "Responsible"  # Options: "Responsible" | "Accountable" | "Consulted" | "Informed"
+    - "Accountable"
+
+  # Evaluation details
+  evaluation:
+    # ISO 8601 datetime when evaluation starts
+    start: "2024-04-01T00:00:00Z"
+    # ISO 8601 datetime when evaluation ends (optional)
+    end: "2025-03-31T23:59:59Z"
+    # Notes about evaluation
+    notes: "Evaluation will be conducted continuously through automated tooling..."
+
+  # Evaluation points (optional)
+  evaluation-points:
+    - "pre-commit-hook"      # For noncompliance risk to workflows or local machines
+    - "pre-merge"            # For noncompliance risk to a development repository
+    - "pre-build"            # For noncompliance risk to primary repositories
+    - "pre-release"          # For noncompliance risk to built assets
+    - "pre-deploy"           # For noncompliance risk to released assets
+    - "runtime-adhoc"        # For noncompliance risk to deployments
+    - "runtime-scheduled"    # For situations where drift may occur
+    - "runtime-reactive"     # For situations where drift detection is automated
+
+  # Enforcement details
+  enforcement:
+    # ISO 8601 datetime when enforcement starts
+    start: "2024-04-01T00:00:00Z"
+    # ISO 8601 datetime when enforcement ends (optional)
+    end: "2025-03-31T23:59:59Z"
+    # Notes about enforcement
+    notes: "Enforcement will be phased: Weeks 1-4 advisory, Weeks 5-8 soft blocks..."
+
+  # Enforcement methods (optional)
+  enforcement-methods:
+    - "Deployment Gate"      # Block deployments that don't meet policy
+    - "Autoremediation"      # Automatically fix issues
+    - "Manual Remediation"   # Create tickets for manual fixes
+
+  # Process for handling noncompliance (optional)
+  noncompliance-plan: "Non-compliant resources will be flagged in the security dashboard..."
+
+# Guidance references (Layer 2 controls)
+guidance-references:
+  - # ID of the referenced Layer 2 catalog
+    reference-id: "OSPS-B"
+
+    # What's in scope for this reference (optional)
+    in-scope:
+      boundaries:
+        - "United States"
+      technologies:
+        - "Git Repositories"
+      providers:
+        - "GitHub Enterprise"
+
+    # What's explicitly out of scope (optional)
+    out-of-scope:
+      boundaries:
+        - "International"
+      technologies:
+        - "Legacy Systems"
+
+    # Modifications to controls (optional)
+    control-modifications:
+      - # ID of the control being modified
+        target-id: "OSPS-AC-01"
+        # Type of modification
+        modification-type: "increase-strictness"  # Options: "increase-strictness" | "clarify" | "reduce-strictness" | "exclude"
+        # Rationale for the modification
+        modification-rationale: "Enterprise requires MFA for all contributors"
+        # Optional: New title
+        title: "Enhanced MFA Requirements"
+        # Optional: New objective
+        objective: "Ensure MFA is required for all repository contributors"
+
+    # Modifications to assessment requirements (optional)
+    assessment-requirement-modifications:
+      - target-id: "OSPS-AC-01.01"
+        modification-type: "increase-strictness"
+        modification-rationale: "Enterprise requires verification for all contributors"
+        # New requirement text
+        text: "Verify MFA is configured for ALL repository contributors"
+        # New applicability tags
+        applicability:
+          - "repository-access"
+          - "all-contributors"
+        # Optional recommendation
+        recommendation: "Use hardware security keys where possible"
+
+    # Modifications to guidelines (optional)
+    guideline-modifications:
+      - target-id: "GUIDELINE-ID"
+        modification-type: "clarify"
+        modification-rationale: "Clarify for cloud environments"
+        title: "Clarified Guideline Title"
+        objective: "Clarified objective"
+        recommendations:
+          - "Clarified recommendation"
+        # Optional: Base guideline ID for enhancements
+        base-guideline-id: "BASE-GUIDELINE-ID"
+        # Optional: Rationale
+        rationale: "Clarified rationale"
+        # Optional: Guideline mappings
+        guideline-mappings:
+          - reference-id: "OTHER-GUIDANCE-ID"
+            entries:
+              - reference-id: "GUIDELINE-ID"
+                strength: 8
+                remarks: "Mapping remarks"
+        # Optional: Principle mappings
+        principle-mappings:
+          - reference-id: "PRINCIPLES-DOC-ID"
+            entries:
+              - reference-id: "PRINCIPLE-ID"
+                strength: 7
+                remarks: "Principle mapping remarks"
+        # Optional: See also
+        see-also:
+          - "RELATED-GUIDELINE-ID"
+        # Optional: External references
+        external-references:
+          - "https://example.com/reference"
+
+# Control references (Layer 1 guidance)
+control-references:
+  - # ID of the referenced Layer 1 guidance document
+    reference-id: "NIST-800-53"
+
+    # What's in scope for this reference (optional)
+    in-scope:
+      boundaries:
+        - "United States"
+      technologies:
+        - "Cloud Computing"
+
+    # What's explicitly out of scope (optional)
+    out-of-scope:
+      boundaries:
+        - "International"
+
+    # Modifications to controls (optional)
+    control-modifications:
+      - target-id: "AC-2"
+        modification-type: "clarify"
+        modification-rationale: "Clarify cloud account management"
+        title: "Clarified Account Management"
+        objective: "Clarified objective for cloud environments"
+
+    # Modifications to assessment requirements (optional)
+    assessment-requirement-modifications:
+      - target-id: "AC-2.1"
+        modification-type: "increase-strictness"
+        modification-rationale: "Require automated account management"
+        text: "Automated account management must be implemented"
+        applicability:
+          - "cloud"
+          - "multi-cloud"
+        recommendation: "Use cloud provider IAM automation"
+
+    # Modifications to guidelines (optional)
+    guideline-modifications:
+      - target-id: "GUIDELINE-ID"
+        modification-type: "clarify"
+        modification-rationale: "Clarification rationale"
+        title: "Modified Guideline Title"
+        objective: "Modified objective"
+        recommendations:
+          - "Modified recommendation"
+
+
