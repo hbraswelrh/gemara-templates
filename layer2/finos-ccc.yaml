@@ -1,0 +1,274 @@
+title: FINOS Cloud Control Catalog
+metadata:
+  id: FINOS-CCC
+  description: |
+    FINOS CCC is an open standard project that describes consistent controls for
+    compliant public cloud deployments in the financial services sector.
+  author:
+    id: finos-ccc
+    name: FINOS CCC Working Group
+    type: Human
+  applicability-categories:
+    - id: tlp_clear
+      title: TLP:Clear
+      description: Information may be shared without restriction.
+    - id: tlp_green
+      title: TLP:Green
+      description: Information may be shared with partners and restricted to the organization.
+    - id: tlp_amber
+      title: TLP:Amber
+      description: Information may be shared with partners and restricted to the organization.
+    - id: tlp_red
+      title: TLP:Red
+      description: Information is restricted to the organization.
+
+families:
+  - id: data-protection
+    title: Data Protection
+    description: |
+      Data protection controls ensure that data is protected from unauthorized
+      access, disclosure, and tampering.
+  - id: network-architecture
+    title: Network Architecture
+    description: |
+      Network architecture controls ensure that cloud network topology is
+      properly documented and environment separation is maintained.
+  - id: change-management
+    title: Change Management
+    description: |
+      Change management controls ensure that all infrastructure changes are
+      tracked, reviewed, and approved through version control systems.
+
+controls:
+  - id: CCC.C01
+    title: Prevent Unencrypted Requests
+    family: data-protection
+    objective: |
+      Ensure that all communications are encrypted in transit to protect data
+      integrity and confidentiality.
+    threat-mappings:
+      - reference-id: CCC
+        entries:
+          - reference-id: CCC.TH02
+            strength: 7
+            remarks: Data is Intercepted in Transit
+    guideline-mappings:
+      - reference-id: CSF
+        entries:
+          - reference-id: PR.DS-02
+            strength: 7
+            remarks: Data-in-transit is protected
+      - reference-id: NIST-800-53
+        entries:
+          - reference-id: SC-8
+            strength: 7
+          - reference-id: SC-13
+            strength: 7
+    assessment-requirements:
+      - id: CCC.C01.TR01
+        text: |
+          When a port is exposed for non-SSH network traffic, all traffic MUST
+          include a TLS handshake AND be encrypted using TLS 1.2 or higher.
+        applicability:
+          - tlp_clear
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+      - id: CCC.C01.TR02
+        text: |
+          When a port is exposed for SSH network traffic, all traffic MUST
+          include a SSH handshake AND be encrypted using SSHv2 or higher.
+        applicability:
+          - tlp_clear
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+
+  - id: CCC.C06
+    title: Prevent Deployment in Restricted Regions
+    family: data-protection
+    objective: |
+      Ensure that resources are not provisioned or deployed in
+      geographic regions or cloud availability zones that have been
+      designated as restricted or prohibited.
+    guideline-mappings:
+      - reference-id: NIST-800-53
+        entries:
+          - reference-id: AC-6
+            strength: 7
+            remarks: This control is closely related to AC-6.
+      - reference-id: CSF
+        entries:
+          - reference-id: PR.DS-1
+            strength: 7
+            remarks: Data-at-rest is protected
+    assessment-requirements:
+      - id: CCC.C06.TR01
+        text: |
+          When a deployment request is made, the service MUST validate
+          that the deployment region is not to a restricted region.
+        applicability:
+          - tlp_clear
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+
+  - id: CCC.C08
+    title: Enable Multi-zone or Multi-region Data Replication
+    family: data-protection
+    objective: |
+      Ensure that data is replicated across multiple zones or regions
+      to protect against data loss due to hardware failures or disasters.
+    guideline-mappings:
+      - reference-id: CSF
+        entries:
+          - reference-id: PR.DS-5
+            strength: 7
+            remarks: Protections against data leaks are implemented
+      - reference-id: NIST-800-53
+        entries:
+          - reference-id: CP-2
+            strength: 7
+            remarks: Contingency plan
+          - reference-id: CP-10
+            strength: 7
+            remarks: Information system recovery and reconstitution
+    assessment-requirements:
+      - id: CCC.C08.TR01
+        text: |
+          When data is stored, the service MUST ensure that data is
+          replicated across multiple availability zones or regions.
+        applicability:
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+
+  - id: CCC.C09
+    title: Maintain Network Architecture Diagrams with Environment Separation
+    family: network-architecture
+    objective: |
+      Ensure network architecture is clearly documented with diagrams that show
+      data flows, system components, and the separation between production,
+      development, and test environments.
+    guideline-mappings:
+      - reference-id: pci-demo
+        entries:
+          - reference-id: "1.1.2"
+            strength: 9
+            remarks: Current network diagram requirement
+          - reference-id: "1.1.3"
+            strength: 7
+            remarks: Data flow diagram showing cardholder data flows
+      - reference-id: NIST-800-53
+        entries:
+          - reference-id: PL-2
+            strength: 7
+            remarks: System security plan
+          - reference-id: SA-17
+            strength: 7
+            remarks: Developer security architecture and design
+    assessment-requirements:
+      - id: CCC.C09.TR01
+        text: |
+          The organization MUST maintain current network diagrams that identify
+          all connections between sensitive data environments and other networks,
+          including any wireless networks.
+        applicability:
+          - tlp_clear
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+      - id: CCC.C09.TR02
+        text: |
+          Network diagrams MUST clearly demonstrate logical and/or physical
+          separation between production, development, and test environments,
+          showing firewall boundaries and access control points.
+        applicability:
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+      - id: CCC.C09.TR03
+        text: |
+          Diagrams MUST be reviewed and updated at least annually and whenever
+          there are changes to the network topology or environment boundaries.
+        applicability:
+          - tlp_amber
+          - tlp_red
+      - id: CCC.C09.TR04
+        text: |
+          Network diagrams for add-on services and external integrations MUST
+          show integration points and data flow paths to sensitive data
+          environments.
+        applicability:
+          - tlp_amber
+          - tlp_red
+
+  - id: CCC.C10
+    title: Track Cloud Network Configuration Changes via Version Control
+    family: change-management
+    objective: |
+      Ensure comprehensive audit trail of all network configuration changes
+      across cloud environments by tracking changes through version control,
+      enabling security reviews and compliance verification.
+    guideline-mappings:
+      - reference-id: pci-demo
+        entries:
+          - reference-id: "1.1.1"
+            strength: 8
+            remarks: Formal process for approving network changes
+          - reference-id: "1.1.7"
+            strength: 9
+            remarks: Requirement to review firewall and router rule sets
+      - reference-id: NIST-800-53
+        entries:
+          - reference-id: CM-3
+            strength: 9
+            remarks: Configuration change control
+          - reference-id: CM-5
+            strength: 7
+            remarks: Access restrictions for change
+    assessment-requirements:
+      - id: CCC.C10.TR01
+        text: |
+          The organization MUST maintain a complete list of all networking
+          changes committed to version control repositories for the trailing
+          12-month period.
+        applicability:
+          - tlp_clear
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+      - id: CCC.C10.TR02
+        text: |
+          All cloud security group changes (AWS, GCP, Azure) MUST be tracked
+          via version control commits with change descriptions, approval
+          records, and timestamps.
+        applicability:
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+      - id: CCC.C10.TR03
+        text: |
+          All cloud firewall rule and VPC configuration changes MUST be tracked
+          via version control commits with change descriptions, approval records,
+          and timestamps.
+        applicability:
+          - tlp_green
+          - tlp_amber
+          - tlp_red
+      - id: CCC.C10.TR04
+        text: |
+          The change list MUST be exportable in a format suitable for audit
+          review, including commit hash, author, date, affected resources,
+          and change description.
+        applicability:
+          - tlp_amber
+          - tlp_red
+      - id: CCC.C10.TR05
+        text: |
+          Changes to network configurations MUST require approval from
+          authorized personnel before merge, documented in version control
+          merge/pull request approvals.
+        applicability:
+          - tlp_amber
+          - tlp_red

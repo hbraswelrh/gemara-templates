@@ -1,0 +1,579 @@
+title: Network Security and Change Management Controls
+metadata:
+  id: NET-CHANGE-OSPS
+  version: "1.0"
+  description: |
+    Network security controls for tracking GitLab-based networking changes,
+    AWS and GCP security group management, and network documentation requirements.
+    Aligned with OSPS Baseline requirements for change tracking, documentation,
+    and environment separation. Covers OSD and add-on services network diagrams
+    with demonstration of separation between production, development, and test
+    environments. Addresses trailing 12-month audit requirements for network changes.
+  author:
+    id: security-team
+    name: Security Engineering Team
+    type: Human
+  applicability-categories:
+    - id: production
+      title: Production Environment
+      description: Systems processing sensitive, regulated, or customer data
+    - id: development
+      title: Development Environment
+      description: Development and engineering environments
+    - id: test
+      title: Test/Staging Environment
+      description: Testing, QA, and staging environments
+    - id: osd
+      title: OSD Services
+      description: OpenShift Dedicated and managed service environments
+    - id: addon
+      title: Add-on Services
+      description: Supporting and add-on service integrations
+  mapping-references:
+    - id: OSPS-B
+      title: Open Source Project Security Baseline
+      version: "2024"
+      description: |
+        The Open Source Project Security (OSPS) Baseline is a set of security
+        criteria that projects should meet to demonstrate a strong security posture.
+      url: "https://github.com/ossf/osps-baseline"
+    - id: CIS-AWS
+      title: CIS Amazon Web Services Foundations Benchmark
+      version: "3.0.0"
+      description: CIS Benchmark for AWS infrastructure security controls
+      url: "https://www.cisecurity.org/benchmark/amazon_web_services"
+    - id: CIS-GCP
+      title: CIS Google Cloud Platform Foundation Benchmark
+      version: "3.0.0"
+      description: CIS Benchmark for GCP infrastructure security controls
+      url: "https://www.cisecurity.org/benchmark/google_cloud_computing_platform"
+    - id: CIS-K8S
+      title: CIS Kubernetes Benchmark
+      version: "1.8.0"
+      description: CIS Benchmark for Kubernetes cluster security
+      url: "https://www.cisecurity.org/benchmark/kubernetes"
+
+families:
+  - id: network-change-tracking
+    title: Network Change Tracking
+    description: |
+      Controls for tracking, auditing, and maintaining a complete history of all
+      networking changes via GitLab version control, including AWS and GCP
+      security group modifications over the trailing 12-month period.
+
+  - id: network-documentation
+    title: Network Documentation and Diagrams
+    description: |
+      Controls for maintaining network architecture diagrams that demonstrate
+      data flows, system components, environment separation, and integration
+      points for OSD and add-on services.
+
+  - id: environment-separation
+    title: Environment Separation Controls
+    description: |
+      Controls ensuring logical and physical network separation between
+      production, development, and test environments per CIS requirements
+      and OSPS Baseline security principles.
+
+controls:
+  - id: NET-CT.01
+    title: GitLab Network Change History (12-Month)
+    family: network-change-tracking
+    objective: |
+      Maintain a comprehensive list of all networking configuration changes
+      committed to GitLab repositories for the trailing 12-month period,
+      providing audit trail for AWS Security Groups, GCP Firewall Rules,
+      VPC configurations, and network policies across all environments.
+    guideline-mappings:
+      - reference-id: OSPS-B
+        entries:
+          - reference-id: OSPS-BR-01
+            strength: 9
+            remarks: Build and release tracking aligns with network change version control requirements
+          - reference-id: OSPS-AC-03
+            strength: 8
+            remarks: Access control for network configuration changes in version control
+      - reference-id: CIS-AWS
+        entries:
+          - reference-id: "3.1"
+            strength: 9
+            remarks: Ensure CloudTrail is enabled in all regions for change tracking
+          - reference-id: "3.4"
+            strength: 8
+            remarks: Ensure CloudTrail trails are integrated with CloudWatch Logs
+      - reference-id: CIS-GCP
+        entries:
+          - reference-id: "2.1"
+            strength: 9
+            remarks: Ensure Cloud Audit Logging is configured for all network changes
+          - reference-id: "2.2"
+            strength: 8
+            remarks: Ensure that sinks are configured for all log entries
+    assessment-requirements:
+      - id: NET-CT.01.01
+        text: |
+          The organization MUST maintain a complete list of all networking changes
+          committed to GitLab repositories for the trailing 12-month period. This
+          list MUST include all commits to infrastructure-as-code repositories
+          managing: AWS Security Groups, GCP Firewall Rules, VPC/VNet configurations,
+          Network ACLs, Route Tables, and Kubernetes Network Policies.
+        applicability:
+          - production
+          - development
+          - test
+          - osd
+          - addon
+      - id: NET-CT.01.02
+        text: |
+          The network change list MUST be exportable in a format suitable for
+          audit review, including: GitLab commit hash, author identity, commit
+          timestamp, affected resources (security groups, firewall rules, etc.),
+          merge request reference, approvers, and change description.
+        applicability:
+          - production
+          - osd
+          - addon
+      - id: NET-CT.01.03
+        text: |
+          GitLab repositories containing network configurations MUST maintain
+          protected branches requiring merge request approvals for all changes
+          to production network configurations.
+        applicability:
+          - production
+          - osd
+
+  - id: NET-CT.02
+    title: AWS Security Group Change Tracking
+    family: network-change-tracking
+    objective: |
+      Ensure all AWS Security Group changes are tracked via GitLab version
+      control with infrastructure-as-code definitions, maintaining complete
+      audit history for the trailing 12-month period per CIS AWS Foundations
+      Benchmark and OSPS Baseline requirements.
+    guideline-mappings:
+      - reference-id: OSPS-B
+        entries:
+          - reference-id: OSPS-BR-02
+            strength: 8
+            remarks: Release process controls apply to network infrastructure changes
+          - reference-id: OSPS-QA-01
+            strength: 7
+            remarks: Quality assurance for infrastructure changes
+      - reference-id: CIS-AWS
+        entries:
+          - reference-id: "5.1"
+            strength: 9
+            remarks: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to admin ports
+          - reference-id: "5.2"
+            strength: 9
+            remarks: Ensure no security groups allow ingress from 0.0.0.0/0 to admin ports
+          - reference-id: "5.3"
+            strength: 8
+            remarks: Ensure VPC default security group restricts all traffic
+          - reference-id: "5.4"
+            strength: 8
+            remarks: Ensure routing tables for VPC peering are least access
+    assessment-requirements:
+      - id: NET-CT.02.01
+        text: |
+          All AWS Security Group configurations MUST be defined in GitLab
+          repositories using Terraform, CloudFormation, or equivalent
+          infrastructure-as-code tooling. Manual console changes MUST be
+          prohibited or immediately reconciled to version control.
+        applicability:
+          - production
+          - development
+          - test
+          - osd
+      - id: NET-CT.02.02
+        text: |
+          AWS Security Group change reports for the trailing 12-month period
+          MUST include: change date, author, GitLab commit reference, affected
+          security group IDs, ingress rule modifications, egress rule modifications,
+          and security group associations.
+        applicability:
+          - production
+          - osd
+          - addon
+      - id: NET-CT.02.03
+        text: |
+          AWS Security Groups MUST use standardized naming conventions
+          (e.g., aws-{environment}-{purpose}-sg) and be tagged with environment
+          classification labels to support audit mapping and environment separation.
+        applicability:
+          - production
+          - development
+          - test
+      - id: NET-CT.02.04
+        text: |
+          Changes to AWS Security Groups in production environments MUST require
+          approval from designated security personnel, documented via GitLab
+          merge request approval workflow.
+        applicability:
+          - production
+          - osd
+
+  - id: NET-CT.03
+    title: GCP Security Group and Firewall Change Tracking
+    family: network-change-tracking
+    objective: |
+      Ensure all GCP firewall rules and VPC security configurations are
+      tracked via GitLab version control, maintaining complete audit history
+      for the trailing 12-month period per CIS GCP Foundations Benchmark
+      and OSPS Baseline requirements.
+    guideline-mappings:
+      - reference-id: OSPS-B
+        entries:
+          - reference-id: OSPS-BR-02
+            strength: 8
+            remarks: Release process controls apply to GCP network infrastructure changes
+          - reference-id: OSPS-QA-01
+            strength: 7
+            remarks: Quality assurance for GCP infrastructure changes
+      - reference-id: CIS-GCP
+        entries:
+          - reference-id: "3.6"
+            strength: 9
+            remarks: Ensure SSH access is restricted from the internet
+          - reference-id: "3.7"
+            strength: 9
+            remarks: Ensure RDP access is restricted from the internet
+          - reference-id: "3.8"
+            strength: 8
+            remarks: Ensure VPC flow logs is enabled for every subnet in VPC Network
+          - reference-id: "3.9"
+            strength: 8
+            remarks: Ensure no HTTPS or SSL proxy load balancers permit weak SSL policies
+    assessment-requirements:
+      - id: NET-CT.03.01
+        text: |
+          All GCP firewall rules MUST be defined in GitLab repositories using
+          Terraform or equivalent infrastructure-as-code tooling. Manual console
+          changes MUST be prohibited or immediately reconciled to version control.
+        applicability:
+          - production
+          - development
+          - test
+          - osd
+      - id: NET-CT.03.02
+        text: |
+          GCP firewall change reports for the trailing 12-month period MUST
+          include: change date, author, GitLab commit reference, affected
+          firewall rule names, ingress rule modifications, egress rule
+          modifications, target tags, and service account associations.
+        applicability:
+          - production
+          - osd
+          - addon
+      - id: NET-CT.03.03
+        text: |
+          GCP firewall rules MUST use standardized naming conventions
+          (e.g., gcp-{project}-{purpose}-fw) and resources MUST be labeled
+          with environment classification labels (gl_env_type, gl_realm,
+          gl_data_classification) to support audit mapping.
+        applicability:
+          - production
+          - development
+          - test
+      - id: NET-CT.03.04
+        text: |
+          All GCP VPCs MUST implement default DENY policies on both ingress
+          and egress, with explicit allow rules documented in version control
+          for required traffic paths only.
+        applicability:
+          - production
+          - osd
+      - id: NET-CT.03.05
+        text: |
+          Changes to GCP firewall rules in production environments MUST require
+          approval from designated security personnel, documented via GitLab
+          merge request approval workflow.
+        applicability:
+          - production
+          - osd
+
+  - id: NET-DOC.01
+    title: Network Diagrams with Environment Separation
+    family: network-documentation
+    objective: |
+      Ensure network architecture is documented with diagrams that clearly
+      show the logical and physical separation between production, development,
+      and test environments, including all network boundaries, security
+      controls, and data flow paths.
+    guideline-mappings:
+      - reference-id: OSPS-B
+        entries:
+          - reference-id: OSPS-DO-01
+            strength: 9
+            remarks: Documentation requirements for project architecture
+          - reference-id: OSPS-DO-02
+            strength: 8
+            remarks: Documentation requirements for system design
+      - reference-id: CIS-AWS
+        entries:
+          - reference-id: "1.1"
+            strength: 7
+            remarks: Maintain current contact details and AWS account information
+      - reference-id: CIS-GCP
+        entries:
+          - reference-id: "1.1"
+            strength: 7
+            remarks: Ensure organizational policy documentation is maintained
+      - reference-id: CIS-K8S
+        entries:
+          - reference-id: "5.2.1"
+            strength: 8
+            remarks: Ensure that the cluster has at least one active policy control mechanism
+    assessment-requirements:
+      - id: NET-DOC.01.01
+        text: |
+          The organization MUST maintain current network architecture diagrams
+          that identify all connections between sensitive data environments
+          and other networks, including: VPC peering, transit gateways, VPNs,
+          private links, and wireless network connections.
+        applicability:
+          - production
+          - development
+          - test
+          - osd
+          - addon
+      - id: NET-DOC.01.02
+        text: |
+          Network diagrams MUST clearly demonstrate logical and/or physical
+          separation between production, development, and test environments,
+          showing: firewall boundaries, security group configurations, VPC/VNet
+          boundaries, and access control points between environments.
+        applicability:
+          - production
+          - development
+          - test
+      - id: NET-DOC.01.03
+        text: |
+          Network diagrams MUST be stored in GitLab version control with change
+          history tracked and accessible for audit review. Diagrams MUST be
+          reviewed and updated at least annually and whenever there are changes
+          to network topology or environment boundaries.
+        applicability:
+          - production
+          - osd
+      - id: NET-DOC.01.04
+        text: |
+          Network diagrams MUST include legend/key explaining security zones,
+          trust boundaries, data classification levels, and network segmentation
+          strategy for production vs. non-production environments.
+        applicability:
+          - production
+          - development
+          - test
+
+  - id: NET-DOC.02
+    title: OSD Network Architecture Diagrams
+    family: network-documentation
+    objective: |
+      Ensure OpenShift Dedicated (OSD) service network architecture is
+      documented with diagrams showing cluster networking topology, service
+      mesh configurations, ingress/egress controls, namespace isolation,
+      and integration points with other environments.
+    guideline-mappings:
+      - reference-id: OSPS-B
+        entries:
+          - reference-id: OSPS-DO-01
+            strength: 9
+            remarks: Documentation requirements for OSD architecture
+          - reference-id: OSPS-DO-03
+            strength: 8
+            remarks: Documentation of security-relevant design decisions
+      - reference-id: CIS-K8S
+        entries:
+          - reference-id: "5.3.1"
+            strength: 9
+            remarks: Ensure CNI supports Network Policies
+          - reference-id: "5.3.2"
+            strength: 9
+            remarks: Ensure all namespaces have Network Policies defined
+    assessment-requirements:
+      - id: NET-DOC.02.01
+        text: |
+          The organization MUST maintain network diagrams for OSD clusters
+          showing cluster networking topology including: node networks,
+          pod networks (CNI configuration), service networks, ClusterIP
+          ranges, and external connectivity paths.
+        applicability:
+          - osd
+      - id: NET-DOC.02.02
+        text: |
+          OSD network diagrams MUST show ingress controller configurations,
+          load balancer integrations (AWS ALB/NLB, GCP Load Balancers),
+          and external traffic flow paths to cluster workloads including
+          TLS termination points.
+        applicability:
+          - osd
+      - id: NET-DOC.02.03
+        text: |
+          OSD network diagrams MUST demonstrate separation between OSD
+          management plane and customer workload networks, showing isolation
+          boundaries, network policies, and access control points between
+          management and tenant namespaces.
+        applicability:
+          - osd
+      - id: NET-DOC.02.04
+        text: |
+          OSD network diagrams MUST show integration points with corporate
+          networks including: VPN configurations, AWS PrivateLink or GCP
+          Private Service Connect endpoints, transit gateway attachments,
+          and peered VPC connections.
+        applicability:
+          - osd
+      - id: NET-DOC.02.05
+        text: |
+          OSD network diagrams MUST document network policies applied at
+          namespace level showing allowed ingress/egress patterns between
+          namespaces and external services.
+        applicability:
+          - osd
+
+  - id: NET-DOC.03
+    title: Add-on Services Network Architecture Diagrams
+    family: network-documentation
+    objective: |
+      Ensure add-on services (monitoring, logging, alerting, security tools)
+      network architecture is documented with diagrams showing integration
+      points, data flows, and network access controls that maintain
+      separation from production workloads.
+    guideline-mappings:
+      - reference-id: OSPS-B
+        entries:
+          - reference-id: OSPS-DO-01
+            strength: 8
+            remarks: Documentation requirements for add-on service architecture
+          - reference-id: OSPS-DO-02
+            strength: 7
+            remarks: Documentation of add-on service integrations
+      - reference-id: CIS-AWS
+        entries:
+          - reference-id: "3.1"
+            strength: 7
+            remarks: Ensure CloudTrail is enabled for monitoring integration
+      - reference-id: CIS-GCP
+        entries:
+          - reference-id: "2.1"
+            strength: 7
+            remarks: Ensure Cloud Audit Logging for monitoring integration
+    assessment-requirements:
+      - id: NET-DOC.03.01
+        text: |
+          The organization MUST maintain network diagrams for all add-on
+          services showing integration points with production, development,
+          and test environments. Add-on services include but are not limited
+          to: monitoring (Prometheus, Datadog), logging (ELK, Splunk),
+          alerting, and security scanning tools.
+        applicability:
+          - addon
+          - production
+      - id: NET-DOC.03.02
+        text: |
+          Add-on service network diagrams MUST show data flow paths for:
+          metrics collection and aggregation, log shipping and aggregation,
+          alerting communications between environments, and webhook/callback
+          endpoints.
+        applicability:
+          - addon
+      - id: NET-DOC.03.03
+        text: |
+          Add-on service network diagrams MUST demonstrate that add-on
+          services have least-privilege network access to sensitive data
+          environments, with explicit documentation of required access paths,
+          ports, protocols, and security group rules.
+        applicability:
+          - addon
+          - production
+      - id: NET-DOC.03.04
+        text: |
+          Network diagrams for security add-on services (SIEM, vulnerability
+          scanners, IDS/IPS, endpoint protection) MUST show network segments,
+          security groups, and firewall rules that enable monitoring
+          functionality without exposing additional attack surface.
+        applicability:
+          - addon
+
+  - id: NET-SEP.01
+    title: Network Isolation Between Environments
+    family: environment-separation
+    objective: |
+      Ensure logical and physical separation between production, development,
+      and test environments through VPC/VNet boundaries, security groups,
+      network policies, and tagging/labeling to prevent unauthorized
+      cross-environment access.
+    guideline-mappings:
+      - reference-id: OSPS-B
+        entries:
+          - reference-id: OSPS-AC-02
+            strength: 9
+            remarks: Least privilege access principles apply to environment separation
+          - reference-id: OSPS-AC-04
+            strength: 8
+            remarks: Access control policies for environment boundaries
+      - reference-id: CIS-AWS
+        entries:
+          - reference-id: "5.4"
+            strength: 9
+            remarks: Ensure routing tables for VPC peering are least access
+      - reference-id: CIS-GCP
+        entries:
+          - reference-id: "3.8"
+            strength: 8
+            remarks: Ensure VPC flow logs is enabled for every subnet
+      - reference-id: CIS-K8S
+        entries:
+          - reference-id: "5.2.1"
+            strength: 9
+            remarks: Ensure cluster has active policy control mechanism for isolation
+    assessment-requirements:
+      - id: NET-SEP.01.01
+        text: |
+          Production, development, and test environments MUST be deployed
+          in separate VPCs/projects/accounts with no direct network peering
+          or routing between production and non-production environments
+          unless explicitly approved and documented.
+        applicability:
+          - production
+          - development
+          - test
+      - id: NET-SEP.01.02
+        text: |
+          All network resources (security groups, firewall rules, VPCs,
+          subnets) MUST be tagged/labeled with environment classification
+          (production, development, test) to enable automated policy
+          enforcement and audit verification.
+        applicability:
+          - production
+          - development
+          - test
+          - osd
+      - id: NET-SEP.01.03
+        text: |
+          Network security policies MUST enforce that development and test
+          environments cannot initiate connections to production data stores,
+          databases, or sensitive production services. Any exceptions MUST
+          be documented and approved by security personnel.
+        applicability:
+          - production
+          - development
+          - test
+      - id: NET-SEP.01.04
+        text: |
+          Environment separation MUST be verified through periodic audit
+          of network configurations, security group rules, firewall policies,
+          and route tables at least annually and after any major network changes.
+        applicability:
+          - production
+          - osd
+      - id: NET-SEP.01.05
+        text: |
+          VPC Flow Logs (AWS) and VPC Flow Logs (GCP) MUST be enabled for
+          all subnets to provide visibility into network traffic patterns
+          and detect potential cross-environment traffic violations.
+        applicability:
+          - production
+          - development
+          - test
