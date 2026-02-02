@@ -1,0 +1,550 @@
+title: "CIS Benchmarks Network Change Audit Controls"
+metadata:
+  id: cis-network-change-audit
+  version: "1.0"
+  description: |
+    Controls for auditing and tracking networking changes across GitLab and 
+    cloud provider security groups (AWS Security Groups, GCP Firewall Rules) 
+    over a 12-month period. These controls are mapped to CIS Benchmark 
+    requirements for AWS and GCP Foundations to ensure compliance with 
+    industry-standard network security configurations.
+  author:
+    id: security-team
+    name: Security Team
+    type: Human
+  mapping-references:
+    - id: cis-aws-foundations-v3
+      title: CIS Amazon Web Services Foundations Benchmark
+      version: "3.0.0"
+      description: |
+        The CIS AWS Foundations Benchmark provides prescriptive guidance for 
+        configuring security options for a subset of Amazon Web Services with 
+        an emphasis on foundational, testable, and architecture agnostic settings.
+      url: "https://www.cisecurity.org/benchmark/amazon_web_services"
+    - id: cis-gcp-foundations-v3
+      title: CIS Google Cloud Platform Foundations Benchmark
+      version: "3.0.0"
+      description: |
+        The CIS GCP Foundations Benchmark provides prescriptive guidance for 
+        establishing a secure baseline configuration for Google Cloud Platform 
+        environments with focus on network security and logging.
+      url: "https://www.cisecurity.org/benchmark/google_cloud_computing_platform"
+    - id: GITLAB
+      title: GitLab Audit Events
+      version: "2025"
+      description: |
+        GitLab's audit event system for tracking changes to repository
+        and infrastructure configurations including IaC changes.
+      url: "https://docs.gitlab.com/ee/administration/audit_events.html"
+    - id: AWS-CLOUDTRAIL
+      title: AWS CloudTrail
+      version: "2025"
+      description: |
+        AWS CloudTrail for logging API calls including Security Group changes,
+        VPC modifications, and network ACL updates.
+      url: "https://docs.aws.amazon.com/cloudtrail/latest/userguide/"
+    - id: GCP-AUDIT
+      title: GCP Cloud Audit Logs
+      version: "2025"
+      description: |
+        Google Cloud Platform audit logging for tracking firewall and 
+        VPC configuration changes.
+      url: "https://cloud.google.com/logging/docs/audit"
+  applicability-categories:
+    - id: production
+      title: Production Environment
+      description: |
+        Production environments where network changes directly impact 
+        live systems and require strict change tracking.
+    - id: staging
+      title: Staging Environment
+      description: |
+        Pre-production environments used for testing network configurations 
+        before production deployment.
+    - id: development
+      title: Development Environment
+      description: |
+        Development environments with relaxed but monitored network controls.
+
+control-families:
+  - id: aws-security-group-audit
+    title: AWS Security Group Change Tracking
+    description: |
+      Controls to ensure all AWS Security Group changes are tracked, logged, 
+      and auditable in compliance with CIS AWS Foundations Benchmark requirements.
+    controls:
+      - id: AWS-SG-01
+        title: Log All Security Group Modifications
+        objective: |
+          Ensure all AWS Security Group changes are captured via CloudTrail 
+          and correlated with GitLab IaC deployments for audit trail compliance.
+        threat-mappings:
+          - reference-id: cis-network-change-audit
+            entries:
+              - reference-id: THREAT-UNAUTH-SG-CHANGE
+                strength: 7
+                remarks: Unauthorized modification of Security Group rules
+              - reference-id: THREAT-EXPOSED-ADMIN-PORTS
+                strength: 7
+                remarks: Exposure of administrative ports (SSH/RDP) to internet
+        guideline-mappings:
+          - reference-id: cis-aws-foundations-v3
+            entries:
+              - reference-id: "3.1"
+                strength: 7
+                remarks: Ensure CloudTrail is enabled in all regions
+              - reference-id: "3.2"
+                strength: 7
+                remarks: Ensure CloudTrail log file validation is enabled
+              - reference-id: "3.4"
+                strength: 7
+                remarks: Ensure CloudTrail trails are integrated with CloudWatch Logs
+              - reference-id: "5.2"
+                strength: 7
+                remarks: Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports
+        assessment-requirements:
+          - id: AWS-SG-01.TR01
+            text: |
+              AWS CloudTrail MUST be enabled and configured to capture all 
+              EC2 Security Group API calls including AuthorizeSecurityGroupIngress, 
+              AuthorizeSecurityGroupEgress, RevokeSecurityGroupIngress, 
+              RevokeSecurityGroupEgress, CreateSecurityGroup, DeleteSecurityGroup,
+              and ModifySecurityGroupRules.
+            applicability:
+              - production
+              - staging
+          - id: AWS-SG-01.TR02
+            text: |
+              CloudTrail logs for Security Group changes MUST be retained for 
+              a minimum of 12 months with at least 3 months immediately available 
+              for query and analysis to support the audit request timeframe.
+            applicability:
+              - production
+          - id: AWS-SG-01.TR03
+            text: |
+              When querying AWS Security Group changes, the system MUST be able 
+              to generate a report filtered by date range (up to 12 months), 
+              security group ID, VPC, region, and the identity of the IAM 
+              user/role that made the change.
+            applicability:
+              - production
+              - staging
+
+      - id: AWS-SG-02
+        title: Detect Non-Compliant Security Group Rules
+        objective: |
+          Identify and alert on Security Group rules that violate CIS Benchmark 
+          requirements, particularly rules allowing unrestricted access to 
+          administrative ports.
+        guideline-mappings:
+          - reference-id: cis-aws-foundations-v3
+            entries:
+              - reference-id: "5.2"
+                strength: 7
+                remarks: Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports (22, 3389)
+              - reference-id: "5.3"
+                strength: 7
+                remarks: Ensure the default security group of every VPC restricts all traffic
+              - reference-id: "5.4"
+                strength: 5
+                remarks: Ensure routing tables for VPC peering are least access
+        assessment-requirements:
+          - id: AWS-SG-02.TR01
+            text: |
+              The system MUST alert when a Security Group change creates an 
+              ingress rule allowing 0.0.0.0/0 or ::/0 to ports 22 (SSH), 
+              3389 (RDP), or other administrative ports.
+            applicability:
+              - production
+              - staging
+          - id: AWS-SG-02.TR02
+            text: |
+              The system MUST generate a non-compliance report listing all 
+              Security Group changes in the last 12 months that violated 
+              CIS Benchmark requirements at the time of change.
+            applicability:
+              - production
+          - id: AWS-SG-02.TR03
+            text: |
+              When the default Security Group of any VPC is modified to allow 
+              traffic, the system MUST flag this as a CIS 5.3 violation.
+            applicability:
+              - production
+              - staging
+
+      - id: AWS-SG-03
+        title: Track Network ACL and VPC Changes
+        objective: |
+          Ensure all Network ACL modifications and VPC configuration changes 
+          are logged and auditable for comprehensive network change tracking.
+        guideline-mappings:
+          - reference-id: cis-aws-foundations-v3
+            entries:
+              - reference-id: "5.1"
+                strength: 7
+                remarks: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports
+              - reference-id: "3.7"
+                strength: 5
+                remarks: Ensure VPC flow logging is enabled in all VPCs
+        assessment-requirements:
+          - id: AWS-SG-03.TR01
+            text: |
+              AWS CloudTrail MUST capture all Network ACL API calls including 
+              CreateNetworkAcl, DeleteNetworkAcl, CreateNetworkAclEntry, 
+              DeleteNetworkAclEntry, and ReplaceNetworkAclEntry.
+            applicability:
+              - production
+              - staging
+          - id: AWS-SG-03.TR02
+            text: |
+              VPC Flow Logs MUST be enabled for all VPCs to capture network 
+              traffic metadata and support network change impact analysis.
+            applicability:
+              - production
+
+  - id: gcp-firewall-audit
+    title: GCP Firewall Rule Change Tracking
+    description: |
+      Controls to ensure all GCP Firewall Rule and VPC network changes are 
+      tracked and auditable in compliance with CIS GCP Foundations Benchmark.
+    controls:
+      - id: GCP-FW-01
+        title: Log All Firewall Rule Modifications
+        objective: |
+          Ensure all GCP Firewall Rule changes are captured via Cloud Audit 
+          Logs and correlated with GitLab IaC deployments.
+        threat-mappings:
+          - reference-id: cis-network-change-audit
+            entries:
+              - reference-id: THREAT-UNAUTH-FW-CHANGE
+                strength: 7
+                remarks: Unauthorized modification of GCP Firewall rules
+              - reference-id: THREAT-EXPOSED-ADMIN-PORTS
+                strength: 7
+                remarks: Exposure of administrative ports (SSH/RDP) to internet
+        guideline-mappings:
+          - reference-id: cis-gcp-foundations-v3
+            entries:
+              - reference-id: "2.1"
+                strength: 7
+                remarks: Ensure that Cloud Audit Logging is configured properly across all services
+              - reference-id: "2.2"
+                strength: 7
+                remarks: Ensure that sinks are configured for all log entries
+              - reference-id: "3.6"
+                strength: 7
+                remarks: Ensure that SSH access is restricted from the internet
+              - reference-id: "3.7"
+                strength: 7
+                remarks: Ensure that RDP access is restricted from the internet
+        assessment-requirements:
+          - id: GCP-FW-01.TR01
+            text: |
+              GCP Cloud Audit Logs MUST be enabled for the Compute Engine API 
+              to capture all firewall-related operations including 
+              compute.firewalls.create, compute.firewalls.delete, 
+              compute.firewalls.update, and compute.firewalls.patch.
+            applicability:
+              - production
+              - staging
+          - id: GCP-FW-01.TR02
+            text: |
+              GCP Audit Logs for firewall changes MUST be retained for a 
+              minimum of 12 months with at least 3 months immediately available 
+              for query and analysis via Cloud Logging.
+            applicability:
+              - production
+          - id: GCP-FW-01.TR03
+            text: |
+              When querying GCP firewall changes, the system MUST be able to 
+              generate a report filtered by date range (up to 12 months), 
+              firewall rule name, network, project, and the identity of the 
+              principal that made the change.
+            applicability:
+              - production
+              - staging
+
+      - id: GCP-FW-02
+        title: Detect Non-Compliant Firewall Rules
+        objective: |
+          Identify and alert on Firewall rules that violate CIS GCP Foundations 
+          Benchmark requirements, particularly rules allowing unrestricted 
+          access from the internet to administrative ports.
+        guideline-mappings:
+          - reference-id: cis-gcp-foundations-v3
+            entries:
+              - reference-id: "3.6"
+                strength: 7
+                remarks: Ensure that SSH access is restricted from the internet
+              - reference-id: "3.7"
+                strength: 7
+                remarks: Ensure that RDP access is restricted from the internet
+              - reference-id: "3.8"
+                strength: 5
+                remarks: Ensure that VPC Flow Logs is enabled for every subnet in a VPC Network
+        assessment-requirements:
+          - id: GCP-FW-02.TR01
+            text: |
+              The system MUST alert when a Firewall rule change creates an 
+              ingress rule allowing 0.0.0.0/0 source range to ports 22 (SSH), 
+              3389 (RDP), or other administrative ports.
+            applicability:
+              - production
+              - staging
+          - id: GCP-FW-02.TR02
+            text: |
+              The system MUST generate a non-compliance report listing all 
+              Firewall rule changes in the last 12 months that violated 
+              CIS GCP Benchmark requirements at the time of change.
+            applicability:
+              - production
+          - id: GCP-FW-02.TR03
+            text: |
+              VPC Flow Logs MUST be enabled for all subnets to capture network 
+              traffic metadata for firewall rule change impact analysis.
+            applicability:
+              - production
+
+      - id: GCP-FW-03
+        title: Track VPC Network and Shared VPC Changes
+        objective: |
+          Ensure all VPC network configurations including Shared VPC 
+          associations and peering connections are logged and auditable.
+        guideline-mappings:
+          - reference-id: cis-gcp-foundations-v3
+            entries:
+              - reference-id: "2.1"
+                strength: 7
+                remarks: Ensure Cloud Audit Logging is configured properly across all services
+              - reference-id: "3.9"
+                strength: 5
+                remarks: Ensure no HTTPS or SSL proxy load balancers permit SSL policies with weak cipher suites
+        assessment-requirements:
+          - id: GCP-FW-03.TR01
+            text: |
+              GCP Cloud Audit Logs MUST capture all VPC network API calls 
+              including compute.networks.create, compute.networks.delete, 
+              compute.subnetworks.create, compute.subnetworks.delete, 
+              and Shared VPC association changes.
+            applicability:
+              - production
+              - staging
+          - id: GCP-FW-03.TR02
+            text: |
+              VPC peering connections and their route configurations MUST be 
+              logged and changes reported as part of the network audit.
+            applicability:
+              - production
+
+  - id: gitlab-iac-tracking
+    title: GitLab IaC Network Change Tracking
+    description: |
+      Controls to track network configuration changes managed through GitLab 
+      Infrastructure-as-Code repositories for AWS and GCP.
+    controls:
+      - id: GITLAB-NET-01
+        title: Track All IaC Network Configuration Changes
+        objective: |
+          Ensure that all infrastructure-as-code changes affecting network 
+          security groups (AWS Security Groups, GCP Firewall Rules) are 
+          tracked through GitLab version control and CI/CD pipelines.
+        threat-mappings:
+          - reference-id: cis-network-change-audit
+            entries:
+              - reference-id: THREAT-UNAUTH-NETWORK-CHANGE
+                strength: 7
+                remarks: Unauthorized network configuration changes bypassing IaC
+              - reference-id: THREAT-AUDIT-GAP
+                strength: 7
+                remarks: Gaps in audit trail for network modifications
+        guideline-mappings:
+          - reference-id: cis-aws-foundations-v3
+            entries:
+              - reference-id: "3.1"
+                strength: 5
+                remarks: Support CloudTrail correlation with IaC deployment events
+          - reference-id: cis-gcp-foundations-v3
+            entries:
+              - reference-id: "2.1"
+                strength: 5
+                remarks: Support Cloud Audit Log correlation with IaC deployment events
+        assessment-requirements:
+          - id: GITLAB-NET-01.TR01
+            text: |
+              When a network configuration change (Terraform, CloudFormation, 
+              Deployment Manager) is committed to GitLab, the system MUST record 
+              the commit hash, author, timestamp, branch, and description of the 
+              change in an immutable audit log.
+            applicability:
+              - production
+              - staging
+          - id: GITLAB-NET-01.TR02
+            text: |
+              GitLab audit events MUST capture merge request approvals, 
+              pipeline executions, and deployment events for repositories 
+              containing network infrastructure-as-code configurations.
+            applicability:
+              - production
+              - staging
+          - id: GITLAB-NET-01.TR03
+            text: |
+              The system MUST be able to correlate GitLab commit/deployment 
+              events with corresponding AWS CloudTrail or GCP Audit Log entries 
+              to verify IaC-driven network changes.
+            applicability:
+              - production
+
+      - id: GITLAB-NET-02
+        title: Detect Drift Between IaC and Actual State
+        objective: |
+          Identify network configuration changes made outside of the IaC 
+          pipeline to detect unauthorized or manual modifications.
+        guideline-mappings:
+          - reference-id: cis-aws-foundations-v3
+            entries:
+              - reference-id: "5.2"
+                strength: 5
+                remarks: Detect Security Group drift from IaC definitions
+          - reference-id: cis-gcp-foundations-v3
+            entries:
+              - reference-id: "3.6"
+                strength: 5
+                remarks: Detect Firewall rule drift from IaC definitions
+        assessment-requirements:
+          - id: GITLAB-NET-02.TR01
+            text: |
+              The system MUST alert when AWS Security Group or GCP Firewall 
+              changes are detected via CloudTrail/Audit Logs without a 
+              corresponding GitLab deployment event within the expected window.
+            applicability:
+              - production
+          - id: GITLAB-NET-02.TR02
+            text: |
+              A drift report MUST be generated listing all network changes 
+              in the last 12 months that occurred outside the IaC pipeline.
+            applicability:
+              - production
+
+  - id: consolidated-reporting
+    title: Consolidated Network Change Reporting
+    description: |
+      Controls for generating comprehensive reports of network security 
+      changes across GitLab, AWS, and GCP for the 12-month audit requirement.
+    controls:
+      - id: REPORT-01
+        title: Generate Consolidated 12-Month Network Change Report
+        objective: |
+          Provide a unified view of all networking changes across GitLab IaC 
+          deployments, AWS Security Groups, and GCP Firewall Rules for the 
+          12-month audit period with CIS compliance status.
+        guideline-mappings:
+          - reference-id: cis-aws-foundations-v3
+            entries:
+              - reference-id: "3.4"
+                strength: 7
+                remarks: CloudWatch integration enables unified monitoring
+              - reference-id: "5.2"
+                strength: 7
+                remarks: Report includes Security Group compliance status
+          - reference-id: cis-gcp-foundations-v3
+            entries:
+              - reference-id: "2.2"
+                strength: 7
+                remarks: Log sinks enable centralized reporting
+              - reference-id: "3.6"
+                strength: 7
+                remarks: Report includes Firewall rule compliance status
+        assessment-requirements:
+          - id: REPORT-01.TR01
+            text: |
+              The reporting system MUST be able to generate a consolidated 
+              report of all network security changes from GitLab, AWS Security 
+              Groups, Network ACLs, and GCP Firewall Rules for any date range 
+              up to 12 months as requested in the audit.
+            applicability:
+              - production
+          - id: REPORT-01.TR02
+            text: |
+              The consolidated report MUST include: change timestamp, 
+              source system (GitLab/AWS/GCP), change type (create/modify/delete), 
+              affected resource identifier, user/principal identity, 
+              change details/diff, and CIS compliance status at time of change.
+            applicability:
+              - production
+          - id: REPORT-01.TR03
+            text: |
+              The reporting system MUST support filtering by: date range, 
+              source system (GitLab/AWS/GCP), change type, affected resource 
+              pattern, user/principal identity, CIS control violated, and 
+              environment (production/staging/development).
+            applicability:
+              - production
+              - staging
+          - id: REPORT-01.TR04
+            text: |
+              The report MUST provide summary statistics including: total 
+              changes per system, changes by type, CIS violations detected, 
+              drift incidents (changes outside IaC), and top contributors.
+            applicability:
+              - production
+
+      - id: REPORT-02
+        title: Network Change Anomaly Detection and Alerting
+        objective: |
+          Identify unusual patterns or potentially unauthorized network 
+          changes through automated analysis of change logs against CIS 
+          Benchmark requirements.
+        guideline-mappings:
+          - reference-id: cis-aws-foundations-v3
+            entries:
+              - reference-id: "4.15"
+                strength: 7
+                remarks: Ensure a log metric filter and alarm exist for AWS Config configuration changes
+              - reference-id: "4.12"
+                strength: 7
+                remarks: Ensure a log metric filter and alarm exist for changes to network gateways
+              - reference-id: "4.13"
+                strength: 7
+                remarks: Ensure a log metric filter and alarm exist for route table changes
+              - reference-id: "4.14"
+                strength: 7
+                remarks: Ensure a log metric filter and alarm exist for VPC changes
+          - reference-id: cis-gcp-foundations-v3
+            entries:
+              - reference-id: "2.4"
+                strength: 7
+                remarks: Ensure log metric filter and alerts exist for VPC Network Firewall rule changes
+              - reference-id: "2.5"
+                strength: 7
+                remarks: Ensure log metric filter and alerts exist for VPC network changes
+        assessment-requirements:
+          - id: REPORT-02.TR01
+            text: |
+              The system MUST alert when network changes occur outside of 
+              defined change windows or without corresponding GitLab 
+              merge request approvals.
+            applicability:
+              - production
+          - id: REPORT-02.TR02
+            text: |
+              The system MUST flag and immediately alert on CIS-violating 
+              changes including: Security Group/Firewall rules opening 
+              0.0.0.0/0 ingress to administrative ports (22, 3389), 
+              modifications to default Security Groups allowing traffic, 
+              and Network ACL rules allowing unrestricted administrative access.
+            applicability:
+              - production
+              - staging
+          - id: REPORT-02.TR03
+            text: |
+              Log metric filters and alarms MUST be configured as per CIS 
+              AWS 4.12-4.15 for network gateway, route table, VPC, and 
+              AWS Config changes.
+            applicability:
+              - production
+          - id: REPORT-02.TR04
+            text: |
+              Log metric filters and alerts MUST be configured as per CIS 
+              GCP 2.4-2.5 for VPC network and Firewall rule changes.
+            applicability:
+              - production
