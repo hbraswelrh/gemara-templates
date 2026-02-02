@@ -1,0 +1,133 @@
+# Layer 1: Guidance Document Template
+# This template represents a high-level cybersecurity guidance document
+# Examples: NIST 800-53, ISO 27001, GDPR, CRA
+
+metadata:
+  # Unique identifier for this guidance document
+  id: "GUIDANCE-ID"
+  # Human-readable title
+  title: "Guidance Document Title"
+  # Description of the document
+  description: "Description of the guidance document"
+  # Author or organization that created this document
+  author: "Author Name or Organization"
+  # Version of the document (optional)
+  version: "1.0.0"
+  # ISO 8601 datetime of last modification (optional)
+  last-modified: "2024-01-15T00:00:00Z"
+  # Publication date in ISO 8601 format (optional)
+  publication-date: "2024-01-01T00:00:00Z"
+
+  # References to other guidance documents for crosswalking (optional)
+  mapping-references:
+    - id: "OTHER-GUIDANCE-ID"
+      title: "Other Guidance Document Title"
+      version: "1.0.0"
+      description: "Description of the referenced document"
+      issuer: "Issuing Organization"
+      url: "https://example.com/guidance-document"
+
+  # Type of document (optional)
+  document-type: "Framework"  # Options: "Standard" | "Regulation" | "Best Practice" | "Framework"
+
+  # Applicability of the document (optional)
+  applicability:
+    # Geographic or legal jurisdictions where this applies
+    jurisdictions:
+      - "United States"
+      - "European Union"
+    # Technology domains where this applies
+    technology-domains:
+      - "cloud-computing"
+      - "artificial-intelligence"
+    # Industry sectors where this applies
+    industry-sectors:
+      - "financial-services"
+      - "healthcare"
+
+  # Exemptions (optional)
+  exemptions:
+    - "Exemption description"
+
+# Introductory text for rendering (optional)
+front-matter: "This guidance document provides..."
+
+# Categories (control families) containing guidelines
+categories:
+  - id: "CATEGORY-ID"
+    title: "Category Title"
+    description: "Description of the category"
+    # Guidelines within this category
+    guidelines:
+      - id: "GUIDELINE-ID"
+        title: "Guideline Title"
+        # Objective of the guideline
+        objective: "What this guideline aims to achieve"
+
+        # Implementation recommendations (optional)
+        recommendations:
+          - "Recommendation 1"
+          - "Recommendation 2"
+
+        # Base guideline ID for enhancements (optional)
+        # Used for control enhancements like AC-2(1) in NIST 800-53
+        base-guideline-id: "BASE-GUIDELINE-ID"
+
+        # Rationale explaining risks and outcomes (optional)
+        rationale:
+          # Negative results from lack of implementation
+          risks:
+            - title: "Risk Title"
+              description: "Description of the risk"
+          # Positive results from implementation
+          outcomes:
+            - title: "Outcome Title"
+              description: "Description of the positive outcome"
+
+        # Guideline parts (sub-statements) that can be assessed individually (optional)
+        guideline-parts:
+          - id: "PART-ID"
+            title: "Part Title"
+            text: "Text of the guideline part"
+            recommendations:
+              - "Part-specific recommendation"
+
+        # Crosswalk mappings to other guidelines (optional)
+        guideline-mappings:
+          - reference-id: "OTHER-GUIDANCE-ID"
+            entries:
+              - reference-id: "OTHER-GUIDELINE-ID"
+                # Strength of mapping (1-10, where 10 is strongest)
+                strength: 8
+                remarks: "Explanation of the mapping relationship"
+
+        # Principle mappings (optional)
+        principle-mappings:
+          - reference-id: "PRINCIPLES-DOC-ID"
+            entries:
+              - reference-id: "PRINCIPLE-ID"
+                strength: 7
+                remarks: "How this guideline relates to the principle"
+
+        # Related guidelines (optional)
+        see-also:
+          - "RELATED-GUIDELINE-ID-1"
+          - "RELATED-GUIDELINE-ID-2"
+
+# Imported guidelines from other documents (optional)
+imported-guidelines:
+  - reference-id: "SOURCE-GUIDANCE-ID"
+    entries:
+      - reference-id: "GUIDELINE-ID"
+        strength: 9
+        remarks: "Why this guideline was imported"
+
+# Imported principles from other documents (optional)
+imported-principles:
+  - reference-id: "PRINCIPLES-DOC-ID"
+    entries:
+      - reference-id: "PRINCIPLE-ID"
+        strength: 8
+        remarks: "Why this principle was imported"
+
+

@@ -1,0 +1,417 @@
+# Layer 3: Enterprise Security Policy
+# This policy demonstrates risk-informed governance that integrates:
+# - Layer 1: NIST 800-53 guidance
+# - Layer 2: OSPS-B controls
+# - Organizational risk appetite and operational constraints
+
+metadata:
+  id: "enterprise-security-policy-2024"
+  title: "Enterprise Open Source Security Policy"
+  objective: |
+    Establish comprehensive security controls for open source software development 
+    that balance security requirements with development velocity, addressing 
+    organizational risk tolerance and regulatory compliance needs.
+  version: "1.0.0"
+  last-modified: "2024-03-20T14:30:00Z"
+  organization-id: "enterprise-corp-2024"
+  author-notes: |
+    This policy integrates NIST 800-53 (Layer 1) guidance with OSPS-B (Layer 2) 
+    controls to create organization-specific requirements. The policy reflects 
+    our risk appetite: we prioritize security but must maintain development 
+    velocity. Critical security violations are non-negotiable, but we provide 
+    flexibility for non-critical issues with proper risk acceptance.
+
+  mapping-references:
+    - id: "NIST-800-53"
+      title: "NIST Special Publication 800-53"
+      version: "Rev. 5"
+      description: "Security and Privacy Controls for Information Systems"
+      url: "https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final"
+    - id: "OSPS-B"
+      title: "Open Source Project Security Baseline"
+      version: "1.0"
+      description: "Security baseline for open source projects"
+      url: "https://github.com/ossf/security-baseline"
+
+  contacts:
+    author:
+      name: "Enterprise Security Architecture Team"
+      primary: true
+      affiliation: "Information Security Office"
+      email: "security-architecture@enterprise-corp.com"
+    responsible:
+      - name: "DevOps Engineering Team"
+        primary: true
+        affiliation: "Engineering Operations"
+        email: "devops@enterprise-corp.com"
+      - name: "Application Security Team"
+        primary: false
+        affiliation: "Information Security Office"
+        email: "appsec@enterprise-corp.com"
+    accountable:
+      - name: "Chief Information Security Officer"
+        primary: true
+        affiliation: "Executive Leadership"
+        email: "ciso@enterprise-corp.com"
+      - name: "VP of Engineering"
+        primary: false
+        affiliation: "Engineering Leadership"
+        email: "vp-engineering@enterprise-corp.com"
+    consulted:
+      - name: "Legal and Compliance Team"
+        affiliation: "Legal Department"
+        email: "legal-compliance@enterprise-corp.com"
+      - name: "Risk Management Office"
+        affiliation: "Enterprise Risk Management"
+        email: "risk-management@enterprise-corp.com"
+    informed:
+      - name: "All Engineering Teams"
+        affiliation: "Engineering Organization"
+
+scope:
+  boundaries:
+    - "United States"
+    - "European Union"
+    - "Canada"
+  technologies:
+    - "Git Repositories"
+    - "CI/CD Pipelines"
+    - "Container Images"
+    - "Package Registries"
+    - "Cloud Infrastructure"
+  providers:
+    - "GitHub Enterprise"
+    - "GitLab Enterprise"
+    - "Amazon Web Services"
+    - "Microsoft Azure"
+    - "Docker Hub"
+    - "Artifactory"
+
+implementation-plan:
+  notification-process: |
+    Policy will be announced via company-wide security bulletin, engineering 
+    all-hands meeting, and posted to internal security wiki. All responsible 
+    and accountable parties will receive direct email notification. Policy 
+    changes will be tracked in version control and communicated through 
+    established change management processes.
+  notified-parties:
+    - "Responsible"
+    - "Accountable"
+    - "Consulted"
+    - "Informed"
+
+  evaluation:
+    start: "2024-04-01T00:00:00Z"
+    end: "2025-03-31T23:59:59Z"
+    notes: |
+      Evaluation will be conducted continuously through automated tooling 
+      integrated into CI/CD pipelines, with quarterly manual assessments by 
+      the Application Security Team. Automated scanning will occur at 
+      pre-commit, pre-merge, pre-build, and pre-deploy stages. Manual reviews 
+      will focus on policy compliance, control effectiveness, and risk assessment.
+
+# TODO: HCM TEAM - collaborate on the evaluation points
+  evaluation-points:
+    - "pre-commit-hook"
+    - "pre-merge"
+    - "pre-build"
+    - "pre-release"
+    - "pre-deploy"
+    - "runtime-scheduled"
+    - "runtime-reactive"
+
+  enforcement:
+    start: "2024-04-01T00:00:00Z"
+    notes: |
+      Enforcement will be phased to balance security with development velocity:
+      - Weeks 1-4: Advisory/warning only to allow teams to remediate
+      - Weeks 5-8: Soft blocks (can be overridden with documented justification)
+      - Week 9+: Hard blocks for critical security violations
+      - Non-critical violations: Continue with soft blocks, require quarterly review
+      This phased approach reflects our risk appetite: we prioritize security 
+      but must maintain development velocity.
+
+  enforcement-methods:
+    - "Deployment Gate"
+    - "Autoremediation"
+    - "Manual Remediation"
+
+  noncompliance-plan: |
+    Non-compliant resources will be flagged in the security dashboard. 
+    Critical violations (e.g., missing MFA, critical vulnerabilities) will 
+    block deployments automatically. Non-critical violations will require 
+    documented risk acceptance from the accountable party. Repeated violations 
+    will trigger escalation to the CISO and may result in suspension of 
+    deployment privileges. Remediation guidance and support will be provided 
+    by the Application Security Team.
+
+guidance-references:
+  - reference-id: "OSPS-B"
+    in-scope:
+      boundaries: ["United States", "European Union", "Canada"]
+      technologies: ["Git Repositories", "CI/CD Pipelines", "Container Images", "Package Registries"]
+      providers: ["GitHub Enterprise", "GitLab Enterprise", "Docker Hub", "Artifactory"]
+    out-of-scope:
+      boundaries: []
+      technologies: ["Legacy Source Control Systems", "On-premises Only Systems"]
+      providers: ["Internal Git Servers (Legacy)"]
+
+    # Risk-informed modifications to OSPS-B controls
+    control-modifications:
+      - target-id: "OSPS-AC-01"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise risk assessment indicates that MFA should be required for 
+          ALL repository contributors, not just maintainers. This exceeds OSPS-B 
+          baseline but aligns with NIST 800-53 IA-2 requirements and our risk 
+          appetite. The cost of requiring MFA for all contributors is acceptable 
+          given the security benefit and reduced risk of account compromise.
+        title: "Enhanced Multi-Factor Authentication for All Repository Access"
+        objective: |
+          Ensure all repository contributors, regardless of role, use 
+          multi-factor authentication to prevent unauthorized access and comply 
+          with enterprise security standards and NIST 800-53 IA-2 requirements.
+
+      - target-id: "OSPS-AC-03"
+        modification-type: "clarify"
+        modification-rationale: |
+          Enterprise uses a monorepo architecture with multiple entry points 
+          and team-specific branches. We need to clarify branch protection 
+          requirements to work with this architecture while maintaining security. 
+          This clarification balances security with operational needs.
+        title: "Branch Protection for Enterprise Monorepo Architecture"
+        objective: |
+          Define branch protection rules that work with enterprise monorepo 
+          structure while maintaining security and enabling efficient 
+          collaboration across multiple teams.
+
+      - target-id: "OSPS-SI-01"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise risk assessment requires automated vulnerability scanning 
+          with specific severity thresholds. Critical and high severity 
+          vulnerabilities (CVSS 7.0+) must block publication. Medium severity 
+          requires documented risk acceptance. This aligns with NIST 800-53 SI-2 
+          and our risk appetite: we cannot accept critical vulnerabilities in 
+          production software.
+        title: "Enhanced Package and Container Security Scanning"
+        objective: |
+          Ensure all published packages and container images are scanned for 
+          vulnerabilities and meet enterprise security thresholds before release, 
+          with automated blocking of critical and high severity issues.
+
+    assessment-requirement-modifications:
+      - target-id: "OSPS-AC-01.01"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise risk assessment indicates that maintainers and privileged 
+          contributors should use hardware security keys (FIDO2/WebAuthn Level 2) 
+          as their primary MFA method. Regular contributors may use TOTP. This 
+          exceeds OSPS-B baseline but aligns with NIST 800-53 IA-2(11) for 
+          hardware-based authentication and our risk appetite for privileged access.
+        text: |
+          All repository maintainers and contributors with write access must use 
+          hardware security keys (FIDO2/WebAuthn Level 2 certified or equivalent) 
+          as their primary MFA method. Contributors with read-only access may use 
+          TOTP-based MFA. Hardware keys must be FIDO2 Level 2 certified or equivalent.
+        applicability: ["maintainers", "privileged-contributors", "repository-access", "enterprise-repositories"]
+        recommendation: |
+          Use YubiKey 5 Series, Google Titan Security Key, or equivalent FIDO2 
+          Level 2 certified hardware keys. Maintainers should have a backup 
+          hardware key registered.
+
+      - target-id: "OSPS-AC-03.01"
+        modification-type: "clarify"
+        modification-rationale: |
+          Enterprise monorepo architecture requires specific branch protection 
+          rules that balance security with multi-team collaboration. We need 
+          to clarify requirements for entry point branches, team-specific branches, 
+          and release branches.
+        text: |
+          Primary branch protection must be configured for all entry point 
+          branches (main, master, release/*) in the monorepo. Protection rules 
+          must require: (1) minimum 2 approvals from different teams for 
+          cross-team changes, (2) status checks from CI/CD pipeline, (3) no force 
+          pushes, (4) no deletion of protected branches. Team-specific feature 
+          branches may have relaxed rules but must merge through protected entry points.
+        applicability: ["monorepo", "branch-protection", "enterprise-repositories", "multi-team-collaboration"]
+        recommendation: |
+          Use GitHub Enterprise branch protection rules or GitLab equivalent. 
+          Configure team-based approval requirements using CODEOWNERS or equivalent. 
+          Integrate with CI/CD status checks for automated validation.
+
+      - target-id: "OSPS-SI-01.01"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise risk assessment requires specific severity thresholds and 
+          blocking rules. Critical and high severity vulnerabilities (CVSS 7.0+) 
+          must block publication. Medium severity requires documented risk 
+          acceptance. This reflects our risk appetite: we cannot accept critical 
+          vulnerabilities, but we provide flexibility for medium severity with 
+          proper risk management.
+        text: |
+          All packages and container images must be scanned using enterprise-approved 
+          tools (Snyk, GitHub Advanced Security, or equivalent) before publication. 
+          Packages with critical or high severity vulnerabilities (CVSS 7.0+) must 
+          not be published. Medium severity vulnerabilities (CVSS 4.0-6.9) require 
+          documented risk acceptance from the Application Security Team. Low severity 
+          vulnerabilities should be remediated within 90 days.
+        applicability: ["package-publishing", "container-images", "vulnerability-scanning", "enterprise-packages"]
+        recommendation: |
+          Integrate scanning into CI/CD pipeline with automated blocking. Use Snyk, 
+          GitHub Dependabot, or equivalent. Configure severity thresholds in 
+          pipeline. Maintain risk acceptance documentation in centralized system.
+
+control-references:
+  - reference-id: "NIST-800-53"
+    in-scope:
+      boundaries: ["United States"]
+      technologies: ["Cloud Infrastructure", "CI/CD Pipelines"]
+      providers: ["Amazon Web Services", "Microsoft Azure", "Google Cloud Platform"]
+    out-of-scope:
+      boundaries: ["European Union", "Canada"]
+      technologies: ["On-premises Infrastructure", "Legacy Systems"]
+      providers: ["Internal Data Centers"]
+
+    # Risk-informed modifications to NIST 800-53 controls
+    control-modifications:
+      - target-id: "AC-2"
+        modification-type: "clarify"
+        modification-rationale: |
+          Enterprise uses cloud-native identity providers and CI/CD systems 
+          requiring specific account lifecycle management procedures. We need to 
+          clarify requirements for cloud-based development environments.
+        title: "Account Management for Cloud Development Environments"
+        objective: |
+          Establish account management procedures for cloud-based development, 
+          CI/CD, and infrastructure access that align with enterprise identity 
+          management standards.
+
+      - target-id: "AC-3"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise risk assessment requires role-based access control (RBAC) 
+          with principle of least privilege for all cloud resources. This exceeds 
+          NIST baseline to address enterprise risk tolerance and regulatory 
+          requirements. The operational cost is acceptable given the security benefit.
+        title: "Enhanced Access Enforcement with Least Privilege"
+        objective: |
+          Implement comprehensive RBAC with least privilege principles across all 
+          cloud infrastructure and development tools.
+
+      - target-id: "IA-2"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise requires multi-factor authentication for all cloud 
+          infrastructure access, aligning with OSPS-B AC-01 modifications. This 
+          creates consistency across development and infrastructure layers and 
+          reflects our risk appetite for cloud access.
+        title: "Multi-Factor Authentication for Cloud Infrastructure"
+        objective: |
+          Require MFA for all cloud infrastructure access, including console, API, 
+          and CLI access, using hardware security keys where possible.
+
+      - target-id: "SI-2"
+        modification-type: "clarify"
+        modification-rationale: |
+          Enterprise uses automated scanning and remediation for container images, 
+          packages, and cloud infrastructure. We need to clarify procedures and 
+          timelines for different vulnerability types.
+        title: "Flaw Remediation for Container and Package Vulnerabilities"
+        objective: |
+          Establish procedures for identifying, prioritizing, and remediating 
+          vulnerabilities in container images, packages, and cloud infrastructure 
+          components with specific timelines based on severity.
+
+      - target-id: "SI-7"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise requires software integrity verification for all container 
+          images and packages before deployment. This includes signature 
+          verification and vulnerability scanning, exceeding NIST baseline. This 
+          reflects our risk appetite: we cannot deploy untrusted software.
+        title: "Enhanced Software Integrity Verification"
+        objective: |
+          Implement comprehensive integrity verification for all software components 
+          including container images, packages, and infrastructure-as-code before 
+          deployment.
+
+    assessment-requirement-modifications:
+      - target-id: "AC-2(1)"
+        modification-type: "clarify"
+        modification-rationale: |
+          Enterprise requires automated account management for cloud development 
+          environments, including integration with HR systems for automatic 
+          provisioning and deprovisioning. We need to specify procedures and 
+          timelines.
+        text: |
+          Automated account management procedures must be implemented for all cloud 
+          development environments. Accounts must be provisioned automatically upon 
+          employee onboarding through integration with HR systems. Accounts must be 
+          deprovisioned within 24 hours of employee departure. Access reviews must be 
+          conducted quarterly with automated reminders to account owners.
+        applicability: ["cloud-infrastructure", "development-environments", "account-management", "enterprise-cloud"]
+        recommendation: |
+          Use AWS IAM Identity Center, Azure AD, or Google Cloud Identity for 
+          centralized account management. Integrate with Workday, BambooHR, or 
+          equivalent HR systems for automated lifecycle management.
+
+      - target-id: "IA-2(11)"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise requires hardware-based authentication tokens for privileged 
+          cloud infrastructure access, aligning with OSPS-B AC-01.01 modifications 
+          for repository access. This creates consistency and reflects our risk 
+          appetite for privileged access.
+        text: |
+          All privileged access to cloud infrastructure (administrative roles, 
+          production environments) must use hardware-based authentication tokens 
+          (FIDO2/WebAuthn Level 2 or equivalent). Software-based MFA (TOTP) is 
+          acceptable for read-only access and development environments only.
+        applicability: ["cloud-infrastructure", "privileged-access", "production-environments", "administrative-roles"]
+        recommendation: |
+          Use hardware security keys (YubiKey, Titan Security Key) for all privileged 
+          cloud access. Configure cloud identity providers to require hardware tokens 
+          for administrative roles.
+
+      - target-id: "SI-2(2)"
+        modification-type: "clarify"
+        modification-rationale: |
+          Enterprise requires automated flaw remediation for container images and 
+          packages, including automated patching where possible and manual 
+          remediation workflows for critical issues. We need to specify procedures 
+          and timelines.
+        text: |
+          Automated flaw remediation must be implemented for container images and 
+          packages where possible. Critical and high severity vulnerabilities 
+          (CVSS 7.0+) must be remediated within 7 days. Automated patching may be 
+          used for non-breaking updates. Breaking updates require manual review and 
+          testing before deployment. All remediation actions must be logged and 
+          tracked in the vulnerability management system.
+        applicability: ["container-images", "packages", "vulnerability-remediation", "automated-patching"]
+        recommendation: |
+          Use automated dependency update tools (Dependabot, Renovate) with 
+          configured policies. Implement automated testing pipelines to validate 
+          patches before deployment. Maintain remediation tracking in Jira, 
+          ServiceNow, or equivalent.
+
+      - target-id: "SI-7(5)"
+        modification-type: "increase-strictness"
+        modification-rationale: |
+          Enterprise requires automated integrity verification for all container 
+          images and packages, including signature verification and vulnerability 
+          scanning before deployment. This exceeds NIST baseline but reflects our 
+          risk appetite: we cannot deploy untrusted or unsigned software.
+        text: |
+          All container images and packages must undergo automated integrity 
+          verification before deployment. Verification must include: (1) cryptographic 
+          signature verification, (2) vulnerability scanning, (3) software 
+          composition analysis, (4) license compliance checking. Images and packages 
+          that fail verification must be blocked from deployment. Verification results 
+          must be logged and retained for audit purposes.
+        applicability: ["container-images", "packages", "integrity-verification", "deployment-gates"]
+        recommendation: |
+          Use container image signing (Cosign, Notary) and package signing (GPG, 
+          Sigstore). Integrate verification into CI/CD pipelines with automated 
+          blocking. Use tools like Snyk, Trivy, or equivalent for comprehensive scanning.
+
